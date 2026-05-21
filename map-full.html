@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Luna Echo Valley - Full Map Laser Focus</title>
+    <style>
+        :root {
+            --bg: #0b1329;
+            --panel-bg: #1c2541;
+            --border: #3a506b;
+            --accent: #48cae4;
+            --accent-glow: rgba(72, 202, 228, 0.6);
+            --text-main: #f8fafc;
+            --text-sub: #cbd5e1;
+        }
+        
+        body {
+            font-family: 'SF Pro Display', -apple-system, sans-serif;
+            background-color: var(--bg);
+            color: var(--text-main);
+            margin: 0;
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            overflow-x: hidden;
+        }
+
+        .btn-back {
+            background: rgba(28, 37, 65, 0.85);
+            backdrop-filter: blur(10px);
+            border: 1px solid #3a506b;
+            color: #48cae4;
+            padding: 12px 20px;
+            border-radius: 30px;
+            text-decoration: none;
+            font-size: 13px;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.3);
+            transition: all 0.2s;
+            margin-bottom: 20px;
+            align-self: center;
+        }
+
+        @media (min-width: 1025px) {
+            .btn-back {
+                position: fixed;
+                top: 25px;
+                left: 25px;
+                margin-bottom: 0;
+                z-index: 9999;
+                align-self: flex-start;
+            }
+        }
+
+        .fullmap-layout {
+            max-width: 1600px;
+            width: 100%;
+            display: grid;
+            grid-template-columns: 1fr 420px;
+            gap: 25px;
+            margin-top: 10px;
+        }
+
+        @media (max-width: 1024px) {
+            .fullmap-layout { grid-template-columns: 1fr; gap: 15px; }
+            .card-info { width: 100%; box-sizing: border-box; padding: 20px !important; }
+        }
+
+        .map-viewport {
+            position: relative;
+            background: #000;
+            border-radius: 12px;
+            overflow-x: auto;
+            border: 1px solid var(--border);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .map-wrapper {
+            position: relative;
+            min-width: 800px;
+            width: 100%;
+        }
+
+        @media (min-width: 1025px) { .map-wrapper { min-width: auto; } }
+
+        .map-viewport img {
+            width: 100%;
+            height: auto;
+            display: block;
+            transition: filter 0.4s ease;
+        }
+
+        .map-viewport.dimmed img { filter: brightness(0.35) contrast(1.1); }
+
+        .hotspot-pin {
+            position: absolute;
+            width: 24px;
+            height: 24px;
+            background-color: var(--accent);
+            border-radius: 50%;
+            border: 2px solid #fff;
+            cursor: pointer;
+            z-index: 10;
+            transform: translate(-50%, -50%);
+            box-shadow: 0 0 12px rgba(0,0,0,0.6);
+            transition: transform 0.2s ease, background-color 0.3s;
+        }
+
+        .hotspot-pin::after {
+            content: '';
+            position: absolute;
+            top: -2px;
+            left: -2px;
+            width: 24px;
+            height: 24px;
+            border: 2px solid var(--accent);
+            border-radius: 50%;
+            animation: pulse-ring 1.8s cubic-bezier(0.215, 0.610, 0.355, 1) infinite;
+        }
+
+        .hotspot-pin:hover, .hotspot-pin.active {
+            transform: translate(-50%, -50%) scale(1.25);
+            background-color: #fff;
+            border-color: var(--accent);
+            box-shadow: 0 0 25px var(--accent-glow);
+        }
+
+        @keyframes pulse-ring {
+            0% { transform: scale(0.7); opacity: 1; }
+            80%, 100% { transform: scale(2.2); opacity: 0; }
+        }
+
+        .card-info {
+            background: var(--panel-bg);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.4);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-self: start;
+        }
+
+        .info-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            gap: 10px;
+        }
+
+        .info-title { font-size: 22px; font-weight: 700; color: #fff; }
+
+        .badge-status {
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 10px;
+            font-weight: 700;
+            text-transform: uppercase;
+            white-space: nowrap;
+        }
+
+        .buka { background: rgba(46, 204, 113, 0.2); color: #2ecc71; border: 1px solid #2ecc71; }
+        .penuh { background: rgba(231, 76, 60, 0.2); color: #e74c3c; border: 1px solid #e74c3c; }
+
+        .meta-tag {
+            font-size: 11px;
+            color: #94a3b8;
+            margin-bottom: 18px;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .info-desc { font-size: 14px; line-height: 1.6; color: var(--text-sub); margin-bottom: 22px; }
+        .text-section { margin-bottom: 18px; animation: slideIn 0.4s ease forwards; }
+        .text-section h4 {
+            margin: 0 0 5px 0; font-size: 11px; text-transform: uppercase; color: var(--accent); letter-spacing: 0.5px;
+        }
+        .text-section p { margin: 0; font-size: 14px; line-height: 1.5; color: #edf2f7; }
+
+        .placeholder { text-align: center; color: #64748b; font-style: italic; font-size: 14px; }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body>
+
+    <a href="index.html" class="btn-back">
+        ⬅ Back to Dashboard
+    </a>
+
+    <div class="fullmap-layout">
+        <div class="map-viewport" id="map-viewport">
+            <div class="map-wrapper">
+                <img src="map.jpg" alt="Resort Map">
+
+                <div class="hotspot-pin" style="top: 29%; left: 81.3%;" onclick="paparInfo(this, 'moraia-suites')"></div>
+                <div class="hotspot-pin" style="top: 22.8%; left: 91.5%;" onclick="paparInfo(this, 'selene-villas')"></div>
+                <div class="hotspot-pin" style="top: 35%; left: 66.8%;" onclick="paparInfo(this, 'pavilion-restaurant')"></div>
+                <div class="hotspot-pin" style="top: 57.5%; left: 80.5%;" onclick="paparInfo(this, 'amora-spa')"></div>
+                <div class="hotspot-pin" style="top: 70%; left: 77.2%;" onclick="paparInfo(this, 'luna-hot-springs')"></div>
+                <div class="hotspot-pin" style="top: 78.5%; left: 88.5%;" onclick="paparInfo(this, 'tennis-courts')"></div>
+                
+                <div class="hotspot-pin" style="top: 42.5%; left: 21.8%;" onclick="paparInfo(this, 'orchid-greenhouse')"></div>
+                <div class="hotspot-pin" style="top: 59.5%; left: 20.2%;" onclick="paparInfo(this, 'butterfly-sanctuary')"></div>
+                <div class="hotspot-pin" style="top: 52.8%; left: 42.2%;" onclick="paparInfo(this, 'organic-farm')"></div>
+                <div class="hotspot-pin" style="top: 33.8%; left: 48.2%;" onclick="paparInfo(this, 'horse-stable')"></div>
+            </div>
+        </div>
+
+        <div class="card-info" id="card-info">
+            <div id="info-content" class="placeholder">
+                Tap on any pulsing point on the full map to inspect real-time facility logistics.
+            </div>
+        </div>
+    </div>
+
+    <script src="map-data.js"></script>
+    <script>
+        function playClickSound() {
+            let context = new (window.AudioContext || window.webkitAudioContext)();
+            let osc = context.createOscillator();
+            let gain = context.createGain();
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(800, context.currentTime); 
+            gain.gain.setValueAtTime(0.1, context.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.01, context.currentTime + 0.1);
+            osc.connect(gain);
+            gain.connect(context.destination);
+            osc.start();
+            osc.stop(context.currentTime + 0.1);
+        }
+
+        function speakDescription(text) {
+            window.speechSynthesis.cancel(); 
+            let utterance = new SpeechSynthesisUtterance(text);
+            utterance.lang = 'en-US'; 
+            window.speechSynthesis.speak(utterance);
+        }
+
+        function paparInfo(pin, slug) {
+            playClickSound();
+
+            document.querySelectorAll('.hotspot-pin').forEach(p => p.classList.remove('active'));
+            pin.classList.add('active');
+            
+            document.getElementById('map-viewport').classList.add('dimmed');
+            const cardInfo = document.getElementById('card-info');
+
+            const data = resortData[slug];
+
+            if(!data) {
+                cardInfo.innerHTML = `<div class="placeholder" style="color:#e74c3c;">Zone data not found.</div>`;
+                return;
+            }
+
+            const badgeClass = data.status === 'Available' ? 'buka' : 'penuh';
+
+            cardInfo.innerHTML = `
+                <div id="info-content">
+                    <div class="info-header">
+                        <div class="info-title">${data.name}</div>
+                        <span class="badge-status ${badgeClass}">${data.status}</span>
+                    </div>
+                    <div class="meta-tag">Operation: ${data.operating_hours}</div>
+                    <div class="info-desc">${data.desc}</div>
+                    <div class="text-section">
+                        <h4>Available Facilities</h4>
+                        <p>${data.fac}</p>
+                    </div>
+                    <div class="text-section">
+                        <h4>Key Activities</h4>
+                        <p>${data.act}</p>
+                    </div>
+                </div>
+            `;
+
+            if(window.innerWidth <= 1024) {
+                cardInfo.scrollIntoView({ behavior: 'smooth' });
+            }
+
+            let voiceText = `Inspecting ${data.name}.`;
+            speakDescription(voiceText);
+        }
+
+        document.querySelector('.map-viewport img').addEventListener('click', function(e) {
+            window.speechSynthesis.cancel(); 
+            document.getElementById('map-viewport').classList.remove('dimmed');
+            document.querySelectorAll('.hotspot-pin').forEach(p => p.classList.remove('active'));
+            document.getElementById('card-info').innerHTML = `<div class="placeholder">Tap on any pulsing point on the full map to inspect real-time facility logistics.</div>`;
+            e.stopPropagation();
+        });
+    </script>
+</body>
+</html>
