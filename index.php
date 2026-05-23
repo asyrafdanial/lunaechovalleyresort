@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Luna Echo Valley - Premium Interactive Map</title>
+    <title>Luna Echo Valley - Premium Interactive Map with Navigation</title>
     <style>
         :root {
             --bg: #0b1329;
@@ -44,7 +44,6 @@
             padding: 0 10px;
         }
 
-        /* --- FULL MAP BUTTON (DAH DIKEMBALIKAN & RESPONSIVE) --- */
         .btn-fullmap {
             background: rgba(28, 37, 65, 0.85);
             backdrop-filter: blur(10px);
@@ -60,10 +59,9 @@
             gap: 8px;
             box-shadow: 0 10px 20px rgba(0,0,0,0.3);
             transition: all 0.2s;
-            margin-bottom: 20px; /* Jarak untuk skrin mobile */
+            margin-bottom: 20px;
         }
 
-        /* Kedudukan di PC (Melayang bucu kanan atas) */
         @media (min-width: 1025px) {
             .btn-fullmap {
                 position: fixed;
@@ -74,7 +72,6 @@
             }
         }
 
-        /* --- RESPONSIVE LAYOUT SYSTEM --- */
         .main-layout {
             max-width: 1400px;
             width: 100%;
@@ -84,9 +81,7 @@
         }
 
         @media (max-width: 1024px) {
-            body {
-                padding: 10px;
-            }
+            body { padding: 10px; }
             .main-layout { 
                 grid-template-columns: 1fr;
                 gap: 15px;
@@ -95,7 +90,6 @@
             .card-info { padding: 20px !important; }
         }
 
-        /* --- MAP CONTAINER WITH SCROLL FOR MOBILE --- */
         .map-viewport {
             position: relative;
             background: #000;
@@ -113,9 +107,7 @@
         }
 
         @media (min-width: 1025px) {
-            .map-wrapper {
-                min-width: auto;
-            }
+            .map-wrapper { min-width: auto; }
         }
 
         .map-viewport img {
@@ -129,7 +121,39 @@
             filter: brightness(0.4) contrast(1.1);
         }
 
-        /* --- HOTSPOT PINS WITH TOUCH OPTIMIZATION --- */
+        /* --- SVG NAVIGATION LAYER --- */
+        .nav-layer {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 9;
+        }
+
+        .route-line {
+            fill: none;
+            stroke: #ff3366;
+            stroke-width: 5;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            stroke-dasharray: 8, 8;
+            animation: dash 1s linear infinite;
+        }
+
+        .route-line.active {
+            opacity: 1;
+        }
+
+        @keyframes dash {
+            to {
+                stroke-dashoffset: -20;
+            }
+        }
+
         .hotspot-pin {
             position: absolute;
             width: 24px;
@@ -154,7 +178,6 @@
             border: 2px solid var(--accent);
             border-radius: 50%;
             animation: pulse-ring 1.8s cubic-bezier(0.215, 0.610, 0.355, 1) infinite;
-            opacity: 1;
         }
 
         .hotspot-pin:hover, .hotspot-pin.active {
@@ -164,12 +187,28 @@
             box-shadow: 0 0 20px var(--accent-glow);
         }
 
+        /* LOKASI LOBBY / ANDA DI SINI */
+        .lobby-pin {
+            position: absolute;
+            width: 28px;
+            height: 28px;
+            background-color: #ffcc00;
+            border-radius: 50%;
+            border: 2px solid #fff;
+            z-index: 11;
+            transform: translate(-50%, -50%);
+            box-shadow: 0 0 15px rgba(255,204,0,0.8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+        }
+
         @keyframes pulse-ring {
             0% { transform: scale(0.7); opacity: 1; }
             80%, 100% { transform: scale(2.2); opacity: 0; }
         }
 
-        /* --- CLEAN TEXT SIDE PANEL --- */
         .card-info {
             background: var(--panel-bg);
             border: 1px solid var(--border);
@@ -224,10 +263,7 @@
             margin-bottom: 20px;
         }
 
-        .text-section {
-            margin-bottom: 15px;
-        }
-
+        .text-section { margin-bottom: 15px; }
         .text-section h4 {
             margin: 0 0 4px 0;
             font-size: 11px;
@@ -235,7 +271,6 @@
             color: var(--accent);
             letter-spacing: 0.5px;
         }
-
         .text-section p {
             margin: 0;
             font-size: 13.5px;
@@ -243,53 +278,41 @@
             color: #edf2f7;
         }
 
+        /* BUTTON TUNJUK JALAN */
+        .btn-nav-trigger {
+            background: #ff3366;
+            color: #fff;
+            border: none;
+            padding: 12px;
+            border-radius: 8px;
+            font-weight: 700;
+            font-size: 13px;
+            cursor: pointer;
+            margin-top: 10px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            box-shadow: 0 5px 15px rgba(255,51,102,0.3);
+            transition: background 0.2s, transform 0.1s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .btn-nav-trigger:hover {
+            background: #ff5588;
+        }
+        .btn-nav-trigger:active {
+            transform: scale(0.98);
+        }
+
         .placeholder {
             text-align: center;
             color: #64748b;
             font-style: italic;
             font-size: 13.5px;
-            line-height: 1.5;
         }
 
-        /* --- FLOATING MASCOTS --- */
-        .mascot {
-            position: absolute;
-            font-size: 32px;
-            z-index: 50;
-            pointer-events: none;
-            user-select: none;
-            filter: drop-shadow(0 10px 15px rgba(0,0,0,0.5));
-        }
-
-        .cute-bear {
-            bottom: -10px;
-            left: -20px;
-            animation: floatBear 6s ease-in-out infinite;
-        }
-
-        .cute-horse {
-            top: -40px;
-            right: 10px;
-            animation: floatHorse 8s ease-in-out infinite;
-        }
-
-        @media (max-width: 768px) {
-            .mascot { display: none; }
-        }
-
-        @keyframes floatBear {
-            0% { transform: translateY(0px) rotate(0deg); }
-            50% { transform: translateY(-15px) rotate(8deg); }
-            100% { transform: translateY(0px) rotate(0deg); }
-        }
-
-        @keyframes floatHorse {
-            0% { transform: translate(0px, 0px) rotate(0deg); }
-            50% { transform: translate(-10px, -15px) rotate(-6deg); }
-            100% { transform: translate(0px, 0px) rotate(0deg); }
-        }
-
-        /* AUDIO HUD */
         .audio-hud {
             position: fixed;
             bottom: 15px;
@@ -307,7 +330,6 @@
             box-shadow: 0 8px 20px rgba(0,0,0,0.4);
             backdrop-filter: blur(8px);
         }
-
         .audio-hud button {
             background: var(--accent);
             border: none;
@@ -329,20 +351,32 @@
     </div>
 
     <h1>Luna Echo Valley Resort & Eco Garden</h1>
-    <p class="subtitle">Tap any pulsing hotspot on the map to display facility details with Voice guidance.</p>
+    <p class="subtitle">Tap any pulsing hotspot on the map to display facility details and routes.</p>
 
-    <a href="map-full.php" class="btn-fullmap" onclick="playClickSound()">
+    <a href="map-full.html" class="btn-fullmap" onclick="playClickSound()">
         Full Map Mode (Laser Focus) ➔
     </a>
 
     <div class="main-layout">
-        
-        <div class="mascot cute-bear">🧸</div>
-        <div class="mascot cute-horse">🐴</div>
-        
         <div class="map-viewport" id="map-viewport">
             <div class="map-wrapper">
                 <img src="map.jpg" alt="Resort Map">
+
+                <svg class="nav-layer" viewBox="0 0 100 100" preserveAspectRatio="none">
+                    <path id="route-moraia-suites" class="route-line" d="M 55,50 L 65,40 L 81.3,29" />
+                    <path id="route-selene-villas" class="route-line" d="M 55,50 L 70,35 L 91.5,22.8" />
+                    <path id="route-pavilion-restaurant" class="route-line" d="M 55,50 L 66.8,35" />
+                    <path id="route-amora-spa" class="route-line" d="M 55,50 L 68,55 L 80.5,57.5" />
+                    <path id="route-luna-hot-springs" class="route-line" d="M 55,50 L 65,65 L 77.2,70" />
+                    <path id="route-tennis-courts" class="route-line" d="M 55,50 L 70,70 L 88.5,78.5" />
+                    
+                    <path id="route-orchid-greenhouse" class="route-line" d="M 55,50 L 38,45 L 21.8,42.5" />
+                    <path id="route-butterfly-sanctuary" class="route-line" d="M 55,50 L 35,55 L 20.2,59.5" />
+                    <path id="route-organic-farm" class="route-line" d="M 55,50 L 42.2,52.8" />
+                    <path id="route-horse-stable" class="route-line" d="M 55,50 L 48.2,33.8" />
+                </svg>
+
+                <div class="lobby-pin" style="top: 50%; left: 55%;">⛺</div>
 
                 <div class="hotspot-pin" style="top: 29%; left: 81.3%;" onclick="paparInfo(this, 'moraia-suites')"></div>
                 <div class="hotspot-pin" style="top: 22.8%; left: 91.5%;" onclick="paparInfo(this, 'selene-villas')"></div>
@@ -360,192 +394,134 @@
 
         <div class="card-info" id="card-info">
             <div id="info-content" class="placeholder">
-                Select a pulsing pin on the map to explore its features.
+                Select a pulsing pin on the map to explore features and routes.
             </div>
         </div>
-
     </div>
 
-<script>
-const englishTranslations = {
-    'moraia-suites': {
-        name: 'Moraia Suites Wing',
-        desc: 'The main accommodation wing offering luxurious rooms with panoramic hill views and natural forest scenery.',
-        fac: 'King-sized beds, private balconies, smart room controls, premium en-suite bathrooms.',
-        act: 'Relaxing, enjoying sunsets, room-service dining.'
-    },
-    'selene-villas': {
-        name: 'Selene Villas',
-        desc: 'Exclusive, private premium villas nested at the highest point of the resort grounds for maximum seclusion.',
-        fac: 'Private plunge pools, dedicated butler service, outdoor rain showers, mini-bars.',
-        act: 'Private retreats, honey-moon stays, stargazing.'
-    },
-    'pavilion-restaurant': {
-        name: 'The Pavilion Restaurant',
-        desc: 'An open-air dining pavilion offering exquisite organic farm-to-table culinary dishes and refreshments.',
-        fac: 'Spacious dining hall, live kitchen counter, buffet island, lounge seating.',
-        act: 'Gourmet dining, food tasting, evening beverage social hours.'
-    },
-    'amora-spa': {
-        name: 'Amora Spa & Wellness Center',
-        desc: 'A premium relaxation center offering authentic traditional body massages and holistic aromatherapy.',
-        fac: 'Therapy rooms, sauna cabins, massage decks, relaxation lounges.',
-        act: 'Traditional massages, skin treatments, deep meditation sessions.'
-    },
-    'luna-hot-springs': {
-        name: 'Luna Natural Hot Springs',
-        desc: 'Natural geothermal pools rich with healthy minerals, perfect for relaxing your body and sore muscles.',
-        fac: 'Thermostatic spring pools, changing lockers, clean shower stations, seating benches.',
-        act: 'Mineral soaking, thermal hydrotherapy, evening relaxation.'
-    },
-    'tennis-courts': {
-        name: 'Tennis Courts & Fitness Pavilion',
-        desc: 'Outdoor sport layouts and recreation spaces for guests looking to maintain an active lifestyle.',
-        fac: 'Standard regulation tennis courts, sports gear rental lockers, night floodlighting.',
-        act: 'Tennis matches, morning drills, physical workouts.'
-    },
-    'orchid-greenhouse': {
-        name: 'Orchid Greenhouse',
-        desc: 'A climate-controlled glass facility housing a breathtaking collection of rare exotic orchid species.',
-        fac: 'Misting irrigation lines, plant information plaques, display walk-paths.',
-        act: 'Botanical photography, educational tours, nature walking.'
-    },
-    'butterfly-sanctuary': {
-        name: 'Butterfly Sanctuary',
-        desc: 'An enclosed botanical dome filled with thousands of vibrant, free-flying native butterfly species.',
-        fac: 'Enclosed netted dome, nectar feeding stations, beautiful floral pathways.',
-        act: 'Insect macro photography, educational group tours, lepidoptera observation.'
-    },
-    'organic-farm': {
-        name: 'Organic Farm & Apiary',
-        desc: 'An eco-friendly agriculture plot producing fresh organic vegetables and premium natural honey.',
-        fac: 'Vegetable vegetable patches, honey-bee apiary boxes, composting bays.',
-        act: 'Agricultural harvesting tours, fresh honey sampling, eco-farming workshops.'
-    },
-    'horse-stable': {
-        name: 'Horse Stable & Riding Trail',
-        desc: 'Equestrian facilities managing well-trained horses with scenic trail pathways through the resort forest.',
-        fac: 'Fenced horse paddocks, riding gear lockers, training rings, natural wilderness trails.',
-        act: 'Guided horse riding, stable feeding sessions, equestrian photo shoots.'
-    }
-};
+    <script src="map-data.js"></script>
+    <script>
+        let audioCtx = null;
+        let bgmInterval = null;
+        let isPlayingBGM = false;
 
-let audioCtx = null;
-let bgmInterval = null;
-let isPlayingBGM = false;
+        function startAmbientBGM() {
+            if (!audioCtx) { audioCtx = new (window.AudioContext || window.webkitAudioContext)(); }
+            const notes = [261.63, 293.66, 329.63, 392.00, 440.00, 523.25];
+            function playSoftTone() {
+                if (!isPlayingBGM) return;
+                let osc = audioCtx.createOscillator();
+                let gain = audioCtx.createGain();
+                let randomNote = notes[Math.floor(Math.random() * notes.length)];
+                osc.frequency.setValueAtTime(randomNote / 2, audioCtx.currentTime);
+                osc.type = 'triangle';
+                gain.gain.setValueAtTime(0, audioCtx.currentTime);
+                gain.gain.linearRampToValueAtTime(0.04, audioCtx.currentTime + 1.5);
+                gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 4.5);
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.start();
+                osc.stop(audioCtx.currentTime + 4.5);
+            }
+            isPlayingBGM = true;
+            playSoftTone();
+            bgmInterval = setInterval(playSoftTone, 2500);
+        }
 
-function startAmbientBGM() {
-    if (!audioCtx) {
-        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-    }
-    const notes = [261.63, 293.66, 329.63, 392.00, 440.00, 523.25];
-    function playSoftTone() {
-        if (!isPlayingBGM) return;
-        let osc = audioCtx.createOscillator();
-        let gain = audioCtx.createGain();
-        let randomNote = notes[Math.floor(Math.random() * notes.length)];
-        osc.frequency.setValueAtTime(randomNote / 2, audioCtx.currentTime);
-        osc.type = 'triangle';
-        gain.gain.setValueAtTime(0, audioCtx.currentTime);
-        gain.gain.linearRampToValueAtTime(0.04, audioCtx.currentTime + 1.5);
-        gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 4.5);
-        osc.connect(gain);
-        gain.connect(audioCtx.destination);
-        osc.start();
-        osc.stop(audioCtx.currentTime + 4.5);
-    }
-    isPlayingBGM = true;
-    playSoftTone();
-    bgmInterval = setInterval(playSoftTone, 2500);
-}
+        function stopAmbientBGM() { isPlayingBGM = false; clearInterval(bgmInterval); }
 
-function stopAmbientBGM() {
-    isPlayingBGM = false;
-    clearInterval(bgmInterval);
-}
+        function toggleAmbientBGM() {
+            const btn = document.getElementById('bgm-toggle-btn');
+            if (!isPlayingBGM) {
+                startAmbientBGM();
+                btn.innerText = "Mute";
+                btn.style.background = "#e74c3c";
+                btn.style.color = "#fff";
+            } else {
+                stopAmbientBGM();
+                btn.innerText = "Play";
+                btn.style.background = "var(--accent)";
+                btn.style.color = "#090d16";
+            }
+        }
 
-function toggleAmbientBGM() {
-    const btn = document.getElementById('bgm-toggle-btn');
-    if (!isPlayingBGM) {
-        startAmbientBGM();
-        btn.innerText = "Mute";
-        btn.style.background = "#e74c3c";
-        btn.style.color = "#fff";
-    } else {
-        stopAmbientBGM();
-        btn.innerText = "Play";
-        btn.style.background = "var(--accent)";
-        btn.style.color = "#090d16";
-    }
-}
+        function playClickSound() {
+            let context = new (window.AudioContext || window.webkitAudioContext)();
+            let osc = context.createOscillator();
+            let gain = context.createGain();
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(800, context.currentTime); 
+            gain.gain.setValueAtTime(0.1, context.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.01, context.currentTime + 0.1);
+            osc.connect(gain);
+            gain.connect(context.destination);
+            osc.start();
+            osc.stop(context.currentTime + 0.1);
+        }
 
-function playClickSound() {
-    let context = new (window.AudioContext || window.webkitAudioContext)();
-    let osc = context.createOscillator();
-    let gain = context.createGain();
-    osc.type = 'sine';
-    osc.frequency.setValueAtTime(800, context.currentTime); 
-    gain.gain.setValueAtTime(0.1, context.currentTime);
-    gain.gain.exponentialRampToValueAtTime(0.01, context.currentTime + 0.1);
-    osc.connect(gain);
-    gain.connect(context.destination);
-    osc.start();
-    osc.stop(context.currentTime + 0.1);
-}
+        function speakDescription(text) {
+            window.speechSynthesis.cancel(); 
+            let utterance = new SpeechSynthesisUtterance(text);
+            utterance.lang = 'en-US'; 
+            window.speechSynthesis.speak(utterance);
+        }
 
-function speakDescription(text) {
-    window.speechSynthesis.cancel(); 
-    let utterance = new SpeechSynthesisUtterance(text);
-    utterance.lang = 'en-US'; 
-    window.speechSynthesis.speak(utterance);
-}
+        function tunjukJalan(slug, namaTempat) {
+            playClickSound();
+            // Padam semua laluan aktif sebelum ni
+            document.querySelectorAll('.route-line').forEach(line => line.classList.remove('active'));
+            
+            // Aktifkan laluan spesifik untuk tempat ni
+            const targetRoute = document.getElementById('route-' + slug);
+            if(targetRoute) {
+                targetRoute.classList.add('active');
+                speakDescription(`Showing navigation route from Lobby to ${namaTempat}. Please follow the highlighted red path.`);
+            }
+        }
 
-function paparInfo(pin, slug) {
-    playClickSound(); 
-    if(!isPlayingBGM) { toggleAmbientBGM(); }
+        function paparInfo(pin, slug) {
+            playClickSound(); 
+            if(!isPlayingBGM) { toggleAmbientBGM(); }
 
-    document.querySelectorAll('.hotspot-pin').forEach(p => p.classList.remove('active'));
-    pin.classList.add('active');
-    
-    const viewport = document.getElementById('map-viewport');
-    viewport.classList.add('dimmed');
+            // Padam laluan lama bila tukar pin
+            document.querySelectorAll('.route-line').forEach(line => line.classList.remove('active'));
 
-    const cardInfo = document.getElementById('card-info');
+            document.querySelectorAll('.hotspot-pin').forEach(p => p.classList.remove('active'));
+            pin.classList.add('active');
+            
+            document.getElementById('map-viewport').classList.add('dimmed');
+            const cardInfo = document.getElementById('card-info');
 
-    fetch('get_zone.php?slug=' + slug)
-        .then(response => response.json())
-        .then(data => {
-            if(data.error) {
-                cardInfo.innerHTML = `<div class="placeholder" style="color:#e74c3c;">${data.error}</div>`;
+            const data = resortData[slug];
+
+            if(!data) {
+                cardInfo.innerHTML = `<div class="placeholder" style="color:#e74c3c;">Zone data not found.</div>`;
                 return;
             }
-            
-            const localData = englishTranslations[slug] || {
-                name: data.name,
-                desc: data.description,
-                fac: data.facilities,
-                act: data.activities
-            };
 
-            const badgeClass = data.status.toLowerCase() === 'buka' ? 'buka' : 'penuh';
-            const statusLabel = data.status.toLowerCase() === 'buka' ? 'Available' : 'Fully Booked';
+            const badgeClass = data.status === 'Available' ? 'buka' : 'penuh';
 
+            // DAH DITAMBAH: BUTANG GET DIRECTIONS DI LINE 302
             cardInfo.innerHTML = `
                 <div id="info-content">
                     <div class="info-header">
-                        <div class="info-title">${localData.name}</div>
-                        <span class="badge-status ${badgeClass}">${statusLabel}</span>
+                        <div class="info-title">${data.name}</div>
+                        <span class="badge-status ${badgeClass}">${data.status}</span>
                     </div>
-                    <div class="meta-tag">Operation: ${data.operating_hours || '8:00 AM - 10:00 PM'}</div>
-                    <div class="info-desc">${localData.desc}</div>
+                    <div class="meta-tag">Operation: ${data.operating_hours}</div>
+                    <div class="info-desc">${data.desc}</div>
                     <div class="text-section">
                         <h4>Available Facilities</h4>
-                        <p>${localData.fac}</p>
+                        <p>${data.fac}</p>
                     </div>
                     <div class="text-section">
                         <h4>Key Activities</h4>
-                        <p>${localData.act}</p>
+                        <p>${data.act}</p>
                     </div>
+                    
+                    <button class="btn-nav-trigger" onclick="tunjukJalan('${slug}', '${data.name}')">
+                        📍 Get Directions From Lobby
+                    </button>
                 </div>
             `;
 
@@ -553,22 +529,18 @@ function paparInfo(pin, slug) {
                 cardInfo.scrollIntoView({ behavior: 'smooth' });
             }
 
-            let voiceText = `Welcome to ${localData.name}. ${localData.desc}`;
+            let voiceText = `Welcome to ${data.name}.`;
             speakDescription(voiceText);
-        })
-        .catch(() => {
-            cardInfo.innerHTML = `<div class="placeholder" style="color:#e74c3c;">Error communicating with the server.</div>`;
+        }
+
+        document.querySelector('.map-viewport img').addEventListener('click', function(e) {
+            window.speechSynthesis.cancel(); 
+            document.getElementById('map-viewport').classList.remove('dimmed');
+            document.querySelectorAll('.hotspot-pin').forEach(p => p.classList.remove('active'));
+            document.querySelectorAll('.route-line').forEach(line => line.classList.remove('active'));
+            document.getElementById('card-info').innerHTML = `<div class="placeholder">Select a zone to explore features and routes.</div>`;
+            e.stopPropagation();
         });
-}
-
-document.querySelector('.map-viewport img').addEventListener('click', function(e) {
-    window.speechSynthesis.cancel(); 
-    document.getElementById('map-viewport').classList.remove('dimmed');
-    document.querySelectorAll('.hotspot-pin').forEach(p => p.classList.remove('active'));
-    document.getElementById('card-info').innerHTML = `<div class="placeholder">Select a zone to explore.</div>`;
-    e.stopPropagation();
-});
-</script>
-
+    </script>
 </body>
 </html>
